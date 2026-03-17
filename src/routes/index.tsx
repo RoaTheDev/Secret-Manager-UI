@@ -1,87 +1,174 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
+import { useQuery } from '@tanstack/react-query'
+import { CheckSquare, ChevronRight, Clock, FolderOpen } from 'lucide-react'
+import { Chip } from '@mui/material'
+import { AppLayout } from '@/components/layout/AppLayout'
+import { approvalApi, projectApi } from '@/api'
+import { useAuthStore } from '@/store/authStore'
+import { formatDistanceToNow } from 'date-fns'
+import { SectionCard } from '#/components/admin/SectionCard'
+import { StatCard } from '#/components/admin/StateCard.tsx'
 
-export const Route = createFileRoute('/')({ component: App })
+export const Route = createFileRoute('/')({
+  component: App,
+})
 
 function App() {
+  const user = useAuthStore((s) => s.user)
+
+  const { data: projectsData, isLoading: projectsLoading } = useQuery({
+    queryKey: ['projects'],
+    queryFn: () => projectApi.getMyProjects(0, 5),
+  })
+
+  const { data: approvalsData, isLoading: approvalsLoading } = useQuery({
+    queryKey: ['approvals', 'pending'],
+    queryFn: () => approvalApi.getPending(0, 5),
+    enabled: user?.role !== 'DEVELOPER',
+  })
+
+  const projects = projectsData?.data.data?.content ?? []
+  const approvals = approvalsData?.data.data?.content ?? []
+  const pendingCount = approvalsData?.data.data?.pagination.totalElements ?? 0
+
   return (
-    <main className="page-wrap px-4 pb-8 pt-14">
-      <section className="island-shell rise-in relative overflow-hidden rounded-[2rem] px-6 py-10 sm:px-10 sm:py-14">
-        <div className="pointer-events-none absolute -left-20 -top-24 h-56 w-56 rounded-full bg-[radial-gradient(circle,rgba(79,184,178,0.32),transparent_66%)]" />
-        <div className="pointer-events-none absolute -bottom-20 -right-20 h-56 w-56 rounded-full bg-[radial-gradient(circle,rgba(47,106,74,0.18),transparent_66%)]" />
-        <p className="island-kicker mb-3">TanStack Start Base Template</p>
-        <h1 className="display-title mb-5 max-w-3xl text-4xl leading-[1.02] font-bold tracking-tight text-[var(--sea-ink)] sm:text-6xl">
-          Start simple, ship quickly.
+    <AppLayout>
+      {/* Page header */}
+      <div className="mb-7">
+        <h1 className="text-[22px] font-semibold text-ocean-700 m-0 mb-1">
+          Welcome back, {user?.name}
         </h1>
-        <p className="mb-8 max-w-2xl text-base text-[var(--sea-ink-soft)] sm:text-lg">
-          This base starter intentionally keeps things light: two routes, clean
-          structure, and the essentials you need to build from scratch.
+        <p className="text-sm text-surface-500 m-0">
+          Here is what needs your attention today.
         </p>
-        <div className="flex flex-wrap gap-3">
-          <a
-            href="/about"
-            className="rounded-full border border-[rgba(50,143,151,0.3)] bg-[rgba(79,184,178,0.14)] px-5 py-2.5 text-sm font-semibold text-[var(--lagoon-deep)] no-underline transition hover:-translate-y-0.5 hover:bg-[rgba(79,184,178,0.24)]"
-          >
-            About This Starter
-          </a>
-          <a
-            href="https://tanstack.com/router"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="rounded-full border border-[rgba(23,58,64,0.2)] bg-white/50 px-5 py-2.5 text-sm font-semibold text-[var(--sea-ink)] no-underline transition hover:-translate-y-0.5 hover:border-[rgba(23,58,64,0.35)]"
-          >
-            Router Guide
-          </a>
-        </div>
-      </section>
+      </div>
 
-      <section className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {[
-          [
-            'Type-Safe Routing',
-            'Routes and links stay in sync across every page.',
-          ],
-          [
-            'Server Functions',
-            'Call server code from your UI without creating API boilerplate.',
-          ],
-          [
-            'Streaming by Default',
-            'Ship progressively rendered responses for faster experiences.',
-          ],
-          [
-            'Tailwind Native',
-            'Design quickly with utility-first styling and reusable tokens.',
-          ],
-        ].map(([title, desc], index) => (
-          <article
-            key={title}
-            className="island-shell feature-card rise-in rounded-2xl p-5"
-            style={{ animationDelay: `${index * 90 + 80}ms` }}
-          >
-            <h2 className="mb-2 text-base font-semibold text-[var(--sea-ink)]">
-              {title}
-            </h2>
-            <p className="m-0 text-sm text-[var(--sea-ink-soft)]">{desc}</p>
-          </article>
-        ))}
-      </section>
+      {/* Stat row */}
+      <div className="grid grid-cols-3 gap-3 mb-7">
+        <StatCard
+          icon={<FolderOpen size={18} className="text-ocean-500" />}
+          label="Your Projects"
+          value={projectsData?.data.data?.pagination.totalElements ?? 0}
+          loading={projectsLoading}
+          iconBg="bg-ocean-50"
+        />
+        <StatCard
+          icon={
+            <CheckSquare
+              size={18}
+              className={
+                pendingCount > 0 ? 'text-warning-base' : 'text-ocean-500'
+              }
+            />
+          }
+          label="Pending Approvals"
+          value={pendingCount}
+          loading={approvalsLoading}
+          iconBg={pendingCount > 0 ? 'bg-warning-light' : 'bg-ocean-50'}
+          valueClass={pendingCount > 0 ? 'text-warning-base' : 'text-ocean-700'}
+        />
+        <StatCard
+          icon={<Clock size={18} className="text-ocean-500" />}
+          label="Your Role"
+          value={user?.role ?? '—'}
+          iconBg="bg-ocean-50"
+        />
+      </div>
 
-      <section className="island-shell mt-8 rounded-2xl p-6">
-        <p className="island-kicker mb-2">Quick Start</p>
-        <ul className="m-0 list-disc space-y-2 pl-5 text-sm text-[var(--sea-ink-soft)]">
-          <li>
-            Edit <code>src/routes/index.tsx</code> to customize the home page.
-          </li>
-          <li>
-            Update <code>src/components/Header.tsx</code> and{' '}
-            <code>src/components/Footer.tsx</code> for brand links.
-          </li>
-          <li>
-            Add routes in <code>src/routes</code> and tweak visual tokens in{' '}
-            <code>src/styles.css</code>.
-          </li>
-        </ul>
-      </section>
-    </main>
+      {/* Content row */}
+      <div className="grid grid-cols-2 gap-5">
+        {/* Recent projects */}
+        <SectionCard
+          title="Recent Projects"
+          linkTo="/projects"
+          linkLabel="View all"
+          loading={projectsLoading}
+          empty={projects.length === 0}
+          emptyText="No projects yet"
+        >
+          {projects.map((project) => (
+            <Link
+              key={project.id}
+              to="/projects/$projectId"
+              params={{ projectId: project.id }}
+              className="block no-underline"
+            >
+              <div
+                className="flex items-center justify-between px-3 py-2.5 rounded-lg
+                              hover:bg-surface-100 transition-colors cursor-pointer"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-ocean-50">
+                    <FolderOpen size={14} className="text-ocean-500" />
+                  </div>
+                  <div>
+                    <p className="text-[13px] font-medium text-surface-700 m-0">
+                      {project.name}
+                    </p>
+                    <p className="text-[11px] text-surface-400 m-0">
+                      {project.memberCount} members
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] text-surface-400">
+                    {formatDistanceToNow(new Date(project.createdAt), {
+                      addSuffix: true,
+                    })}
+                  </span>
+                  <ChevronRight size={14} className="text-surface-300" />
+                </div>
+              </div>
+            </Link>
+          ))}
+        </SectionCard>
+
+        {/* Pending approvals */}
+        {user?.role !== 'DEVELOPER' && (
+          <SectionCard
+            title="Pending Your Vote"
+            linkTo="/approvals"
+            linkLabel="View all"
+            loading={approvalsLoading}
+            empty={approvals.length === 0}
+            emptyText="No pending approvals"
+          >
+            {approvals.map((approval) => (
+              <div
+                key={approval.id}
+                className="flex items-center justify-between px-3 py-2.5 rounded-lg
+                           bg-warning-light border border-[#F5E3BB] mb-1.5"
+              >
+                <div className="flex items-center gap-3">
+                  <Clock size={14} className="text-warning-base shrink-0" />
+                  <div>
+                    <p className="text-[13px] font-medium text-surface-700 m-0">
+                      {approval.credentialName}
+                    </p>
+                    <p className="text-[11px] text-surface-400 m-0">
+                      by {approval.requestedBy}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Chip
+                    label={`${approval.approveCount}/${approval.quorumRequired}`}
+                    size="small"
+                    color="success"
+                    variant="outlined"
+                  />
+                  <Link
+                    to="/approvals"
+                    className="text-[12px] text-ocean-500 font-medium no-underline"
+                  >
+                    Vote
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </SectionCard>
+        )}
+      </div>
+    </AppLayout>
   )
 }

@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { UserSummary } from '#/common/types/userType.ts'
+import type { UserSummary } from '#/commons/types/userType.ts'
 
 interface AuthState {
   accessToken: string | null

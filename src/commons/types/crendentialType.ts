@@ -1,4 +1,4 @@
-import type { AccessTier, ApprovalPolicy, CredentialType } from '#/common/constant/apiConstant.ts'
+import type { AccessTier, ApprovalPolicy, CredentialType } from '#/commons/constant/apiConstant.ts'
 
 export interface CreateCredentialRequest {
   projectId: string

@@ -1,4 +1,4 @@
-import type { AccessTier, ApprovalStatus, VoteChoice } from '#/common/constant/apiConstant.ts'
+import type { AccessTier, ApprovalStatus, VoteChoice } from '#/commons/constant/apiConstant.ts'
 
 export interface CastVoteRequest {
   vote: VoteChoice

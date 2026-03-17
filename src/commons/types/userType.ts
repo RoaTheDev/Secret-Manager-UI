@@ -1,4 +1,4 @@
-import type { UserRole } from '#/common/constant/apiConstant.ts'
+import type { UserRole } from '#/commons/constant/apiConstant.ts'
 
 export interface LoginRequest {
   email: string

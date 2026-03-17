@@ -1,0 +1,71 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap');
+@import "tailwindcss";
+
+@plugin "@tailwindcss/typography";
+
+
+@theme {
+  --font-sans: "Inter", "system-ui", "sans-serif";
+  --font-mono: "JetBrains Mono", "Fira Code", "monospace";
+
+  --color-brand-50: #fef3ee;
+  --color-brand-100: #fde4d3;
+  --color-brand-200: #fbc5a5;
+  --color-brand-300: #f89d6d;
+  --color-brand-400: #f47033;
+  --color-brand-500: #e8704a;
+  --color-brand-600: #c4563a;
+  --color-brand-700: #a34030;
+  --color-brand-800: #82362a;
+  --color-brand-900: #6a2f27;
+}
+
+@layer base {
+  :root {
+    --tw-important: #root;
+  }
+}
+
+
+:root {
+  font-family: "Inter", system-ui, sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  background-color: #fafafa;
+  color: #2d2d2d;
+}
+
+
+.cm-editor {
+  font-family: "JetBrains Mono", "Fira Code", monospace !important;
+  font-size: 13px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.cm-editor.cm-focused {
+  outline: 2px solid #e8704a;
+  outline-offset: 0;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a1a1a1;
+}

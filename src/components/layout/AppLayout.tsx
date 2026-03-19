@@ -10,9 +10,9 @@ import {
 } from 'lucide-react'
 import { Avatar } from '@mui/material'
 import { useMutation } from '@tanstack/react-query'
-import { authApi } from '#/api/authApi.ts'
-import { useAuthStore } from '#/store/authStore.ts'
-import type { UserRole } from '#/commons/constant/apiConstant.ts'
+import { authApi } from '@/api/authApi'
+import { useAuthStore } from '@/store/authStore'
+import type { UserRole } from '@/commons/constant/apiConstant'
 
 interface NavItem {
   label: string
@@ -24,7 +24,12 @@ interface NavItem {
 const NAV: NavItem[] = [
   { label: 'Dashboard', to: '/', icon: <LayoutDashboard size={16} /> },
   { label: 'Projects', to: '/projects', icon: <FolderOpen size={16} /> },
-  { label: 'Approvals', to: '/approvals', icon: <CheckSquare size={16} /> },
+  {
+    label: 'Approvals',
+    to: '/approvals',
+    icon: <CheckSquare size={16} />,
+    roles: ['ADMIN', 'PROJECT_MANAGER', 'TEAM_LEAD'],
+  },
   {
     label: 'Admin',
     to: '/admin',
@@ -64,7 +69,7 @@ export const AppLayout = ({ children }: { children: ReactNode }) => {
         <nav className="flex-1 px-3 pt-3">
           {visibleNav.map((item) => (
             <Link key={item.to} to={item.to} className="block mb-0.5">
-              {({ isActive }) => (
+              {({ isActive }: { isActive: boolean }) => (
                 <div
                   className={[
                     'flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] transition-colors cursor-pointer',

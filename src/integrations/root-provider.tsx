@@ -3,8 +3,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 let context:
   | {
-  queryClient: QueryClient
-}
+      queryClient: QueryClient
+    }
   | undefined
 
 export function getContext() {
@@ -12,7 +12,14 @@ export function getContext() {
     return context
   }
 
-  const queryClient = new QueryClient()
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: 1000 * 60 * 5,
+        retry: 3,
+      },
+    },
+  })
 
   context = {
     queryClient,
@@ -22,8 +29,8 @@ export function getContext() {
 }
 
 export default function TanStackQueryProvider({
-                                                children,
-                                              }: {
+  children,
+}: {
   children: ReactNode
 }) {
   const { queryClient } = getContext()

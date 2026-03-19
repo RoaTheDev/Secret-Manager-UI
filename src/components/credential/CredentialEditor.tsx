@@ -2,17 +2,27 @@ import { useMemo } from 'react'
 import CodeMirror from '@uiw/react-codemirror'
 import { lintGutter } from '@codemirror/lint'
 import { yaml } from '@codemirror/lang-yaml'
-import { getLinterExtension } from '@/lib/linters'
-import type { CredentialType } from '@/commons/constant/apiConstant'
+import { javascript } from '@codemirror/lang-javascript'
+import { getLinterExtension } from '#/lib/linters.ts'
+import type { CredentialType } from '#/commons/constant/apiConstant.ts'
+import { nginx } from '@codemirror/legacy-modes/mode/nginx'
+import { StreamLanguage } from '@codemirror/language'
 
 const getLanguageExtension = (type: CredentialType) => {
   switch (type) {
     case 'CONFIG_FILE':
     case 'DOCKER_CONFIG':
       return yaml()
-    case 'ENV_VAR':
-    case 'TERRAFORM':
+
     case 'NGINX_CONFIG':
+      return StreamLanguage.define(nginx)
+
+    case 'TERRAFORM':
+      return javascript({ jsx: false })
+
+    case 'ENV_VAR':
+      return javascript({ jsx: false })
+
     case 'SSH_KEY':
     case 'TLS_CERT':
     case 'DATABASE_URL':
@@ -28,6 +38,7 @@ interface CredentialEditorProps {
   type: CredentialType
   onChange: (value: string) => void
   error?: boolean
+  linter?: any
 }
 
 export const CredentialEditor = ({
@@ -35,24 +46,29 @@ export const CredentialEditor = ({
   type,
   onChange,
   error = false,
+  linter,
 }: CredentialEditorProps) => {
   const extensions = useMemo(() => {
     const exts = [lintGutter()]
 
     const lang = getLanguageExtension(type)
-    const linter = getLinterExtension(type)
-
     if (lang) exts.push(lang)
-    if (linter) exts.push(linter)
+
+    if (linter) {
+      exts.push(linter)
+    } else {
+      const customLinter = getLinterExtension(type)
+      if (customLinter) exts.push(customLinter)
+    }
 
     return exts
-  }, [type])
+  }, [type, linter])
 
   return (
     <div
       className={[
-        'rounded-lg overflow-hidden transition-colors',
-        error ? 'outline outline-2 outline-danger-base' : 'outline-none',
+        'rounded-lg overflow-hidden border transition-colors',
+        error ? 'border-2 border-red-500' : 'border border-gray-200',
       ].join(' ')}
     >
       <CodeMirror
@@ -64,9 +80,10 @@ export const CredentialEditor = ({
           foldGutter: true,
           highlightActiveLine: true,
           autocompletion: false,
+          indentOnInput: true,
         }}
         theme="light"
-        style={{ fontSize: '13px' }}
+        style={{ fontSize: '13px', minHeight: '180px' }}
       />
     </div>
   )

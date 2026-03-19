@@ -19,12 +19,14 @@ function App() {
   const { data: projectsData, isLoading: projectsLoading } = useQuery({
     queryKey: ['projects'],
     queryFn: () => projectApi.getMyProjects(0, 5),
+    staleTime: 1000 * 60 * 5
   })
 
   const { data: approvalsData, isLoading: approvalsLoading } = useQuery({
     queryKey: ['approvals', 'pending'],
     queryFn: () => approvalApi.getPending(0, 5),
     enabled: user?.role !== 'DEVELOPER',
+    staleTime: 1000 * 60 * 5
   })
 
   const projects = projectsData?.data.data?.content ?? []

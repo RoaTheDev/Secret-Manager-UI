@@ -8,7 +8,13 @@ export interface CreateCredentialRequest {
   accessTier: AccessTier
   approvalPolicy: ApprovalPolicy
 }
-
+export interface UpdateCredentialRequest {
+  name: string
+  type: CredentialType
+  value: string
+  accessTier: AccessTier
+  approvalPolicy: ApprovalPolicy
+}
 export interface CredentialSummary {
   id: string
   name: string

@@ -3,7 +3,7 @@ import type { ApiRes, PageResponse } from '#/commons/types'
 import type {
   CreateCredentialRequest, CredentialCreatedResponse,
   CredentialDetail, CredentialRevealResponse,
-  CredentialSummary,
+  CredentialSummary, UpdateCredentialRequest,
 } from '#/commons/types/crendentialType.ts'
 import type { AccessRequestedResponse } from '#/commons/types/approvalType.ts'
 
@@ -13,7 +13,8 @@ export const credentialApi = {
       `/credentials/project/${projectId}`,
       { params: { page, size, sort: 'createdAt,desc' } },
     ),
-
+  update: (credentialId: string, data: UpdateCredentialRequest) =>
+    api.patch<ApiRes<CredentialDetail>>(`/credentials/${credentialId}`, data),
   getDetail: (credentialId: string) =>
     api.get<ApiRes<CredentialDetail>>(`/credentials/${credentialId}`),
 

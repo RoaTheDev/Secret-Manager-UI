@@ -15,9 +15,8 @@ export const adminApi = {
       params: { page, size },
     }),
 
-  deactivateUser: (userId: string) =>
-    api.patch<ApiRes<void>>(`/admin/users/${userId}/deactivate`),
-
+  deactivateUser: (id: string, adminIds?: string[]) =>
+    api.patch(`/admin/users/${id}/deactivate`, adminIds ? { adminIds } : undefined),
   activateUser: (userId: string) =>
     api.patch<ApiRes<void>>(`/admin/users/${userId}/activate`),
 

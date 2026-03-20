@@ -1,4 +1,9 @@
-import { createRootRoute, isRedirect, Outlet, redirect } from '@tanstack/react-router'
+import {
+  createRootRoute,
+  isRedirect,
+  Outlet,
+  redirect,
+} from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 
@@ -15,8 +20,8 @@ export const Route = createRootRoute({
     if (!isAuthenticated) {
       try {
         const response = await authApi.refresh()
-        const { accessToken, user } = response.data.data!
-        setAuth(accessToken, user)
+        const { accessToken, expiresAt, user } = response.data.data!
+        setAuth(accessToken, expiresAt, user)
 
         if (isPublicRoute) {
           throw redirect({ to: '/' })

@@ -1,9 +1,16 @@
 import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { useState } from 'react'
-import { useForm, Controller } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Alert, Button, CircularProgress, IconButton, InputAdornment, TextField } from '@mui/material'
+import {
+  Alert,
+  Button,
+  CircularProgress,
+  IconButton,
+  InputAdornment,
+  TextField,
+} from '@mui/material'
 import { Visibility, VisibilityOff } from '@mui/icons-material'
 import { Lock } from 'lucide-react'
 import { useMutation } from '@tanstack/react-query'
@@ -11,7 +18,7 @@ import { authApi } from '@/api/authApi'
 import { useAuthStore } from '@/store/authStore'
 
 const loginSchema = z.object({
-  email:    z.string().email('Enter a valid email address'),
+  email: z.string().email('Enter a valid email address'),
   password: z.string().min(1, 'Password is required'),
 })
 type LoginForm = z.infer<typeof loginSchema>
@@ -21,11 +28,15 @@ export const Route = createFileRoute('/login')({
 })
 
 export function LoginPage() {
-  const router  = useRouter()
+  const router = useRouter()
   const setAuth = useAuthStore((s) => s.setAuth)
   const [showPassword, setShowPassword] = useState(false)
 
-  const { control, handleSubmit, formState: { errors } } = useForm<LoginForm>({
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: '', password: '' },
   })
@@ -33,8 +44,8 @@ export function LoginPage() {
   const loginMutation = useMutation({
     mutationFn: authApi.login,
     onSuccess: (res) => {
-      const { accessToken, user } = res.data.data!
-      setAuth(accessToken, user)
+      const { accessToken, expiresAt, user } = res.data.data!
+      setAuth(accessToken, expiresAt, user)
       router.navigate({ to: '/' })
     },
   })
@@ -42,11 +53,12 @@ export function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center p-6 bg-surface-100">
       <div className="w-full max-w-[400px]">
-
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-[52px] h-[52px]
-                          rounded-[14px] bg-ocean-500 mb-4">
+          <div
+            className="inline-flex items-center justify-center w-[52px] h-[52px]
+                          rounded-[14px] bg-ocean-500 mb-4"
+          >
             <Lock size={24} color="#FFFFFF" />
           </div>
           <h1 className="text-[22px] font-semibold text-ocean-700 m-0 mb-1.5">
@@ -59,7 +71,6 @@ export function LoginPage() {
 
         {/* Card */}
         <div className="bg-surface-0 rounded-xl border border-surface-200 p-8">
-
           {loginMutation.isError && (
             <Alert severity="error" className="mb-5">
               Invalid email or password
@@ -108,12 +119,15 @@ export function LoginPage() {
                             onClick={() => setShowPassword((p) => !p)}
                             edge="end"
                             size="small"
-                            aria-label={showPassword ? 'Hide password' : 'Show password'}
-                          >
-                            {showPassword
-                              ? <VisibilityOff fontSize="small" />
-                              : <Visibility   fontSize="small" />
+                            aria-label={
+                              showPassword ? 'Hide password' : 'Show password'
                             }
+                          >
+                            {showPassword ? (
+                              <VisibilityOff fontSize="small" />
+                            ) : (
+                              <Visibility fontSize="small" />
+                            )}
                           </IconButton>
                         </InputAdornment>
                       ),
@@ -131,10 +145,11 @@ export function LoginPage() {
               disabled={loginMutation.isPending}
               className="mt-1"
             >
-              {loginMutation.isPending
-                ? <CircularProgress size={20} color="inherit" />
-                : 'Sign in'
-              }
+              {loginMutation.isPending ? (
+                <CircularProgress size={20} color="inherit" />
+              ) : (
+                'Sign in'
+              )}
             </Button>
           </form>
         </div>

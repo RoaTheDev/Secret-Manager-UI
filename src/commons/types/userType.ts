@@ -14,7 +14,8 @@ export interface RegisterRequest {
 
 export interface LoginResponse {
   accessToken: string
-  user: UserSummary
+  user: UserSummary,
+  expiresAt:   number
 }
 
 export interface UserSummary {

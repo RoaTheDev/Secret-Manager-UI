@@ -23,6 +23,9 @@ export const projectApi = {
   addMember: (projectId: string, data: AddMemberRequest) =>
     api.post<ApiRes<void>>(`/projects/${projectId}/members`, data),
 
+
+
+
   removeMember: (projectId: string, userId: string) =>
     api.delete<ApiRes<void>>(`/projects/${projectId}/members/${userId}`),
 }

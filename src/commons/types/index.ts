@@ -32,3 +32,7 @@ export interface ShamirStatusResponse {
   initialized: boolean
   totalShares: number
 }
+export interface DeletionVoteStatus {
+  votedCount:  number
+  totalAdmins: number
+}

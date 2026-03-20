@@ -91,7 +91,6 @@ const ApprovalCard = ({
 
   return (
     <div className="bg-surface-0 border border-surface-200 rounded-xl px-6 py-5">
-      {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-start gap-3">
           <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-warning-light shrink-0 mt-0.5">
@@ -120,7 +119,6 @@ const ApprovalCard = ({
         />
       </div>
 
-      {/* Quorum progress */}
       <div className="mb-4">
         <div className="flex items-center justify-between mb-1.5">
           <span className="text-[12px] text-surface-500">
@@ -141,7 +139,6 @@ const ApprovalCard = ({
         />
       </div>
 
-      {/* Actions */}
       <div className="flex gap-2">
         <Button
           variant="contained"

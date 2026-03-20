@@ -19,14 +19,14 @@ function App() {
   const { data: projectsData, isLoading: projectsLoading } = useQuery({
     queryKey: ['projects'],
     queryFn: () => projectApi.getMyProjects(0, 5),
-    staleTime: 1000 * 60 * 5
+    staleTime: 1000 * 60 * 5,
   })
 
   const { data: approvalsData, isLoading: approvalsLoading } = useQuery({
     queryKey: ['approvals', 'pending'],
     queryFn: () => approvalApi.getPending(0, 5),
     enabled: user?.role !== 'DEVELOPER',
-    staleTime: 1000 * 60 * 5
+    staleTime: 1000 * 60 * 5,
   })
 
   const projects = projectsData?.data.data?.content ?? []
@@ -35,7 +35,6 @@ function App() {
 
   return (
     <AppLayout>
-      {/* Page header */}
       <div className="mb-7">
         <h1 className="text-[22px] font-semibold text-ocean-700 m-0 mb-1">
           Welcome back, {user?.name}
@@ -45,7 +44,6 @@ function App() {
         </p>
       </div>
 
-      {/* Stat row */}
       <div className="grid grid-cols-3 gap-3 mb-7">
         <StatCard
           icon={<FolderOpen size={18} className="text-ocean-500" />}
@@ -54,21 +52,25 @@ function App() {
           loading={projectsLoading}
           iconBg="bg-ocean-50"
         />
-        <StatCard
-          icon={
-            <CheckSquare
-              size={18}
-              className={
-                pendingCount > 0 ? 'text-warning-base' : 'text-ocean-500'
-              }
-            />
-          }
-          label="Pending Approvals"
-          value={pendingCount}
-          loading={approvalsLoading}
-          iconBg={pendingCount > 0 ? 'bg-warning-light' : 'bg-ocean-50'}
-          valueClass={pendingCount > 0 ? 'text-warning-base' : 'text-ocean-700'}
-        />
+        {user?.role !== 'DEVELOPER' && (
+          <StatCard
+            icon={
+              <CheckSquare
+                size={18}
+                className={
+                  pendingCount > 0 ? 'text-warning-base' : 'text-ocean-500'
+                }
+              />
+            }
+            label="Pending Approvals"
+            value={pendingCount}
+            loading={approvalsLoading}
+            iconBg={pendingCount > 0 ? 'bg-warning-light' : 'bg-ocean-50'}
+            valueClass={
+              pendingCount > 0 ? 'text-warning-base' : 'text-ocean-700'
+            }
+          />
+        )}
         <StatCard
           icon={<Clock size={18} className="text-ocean-500" />}
           label="Your Role"

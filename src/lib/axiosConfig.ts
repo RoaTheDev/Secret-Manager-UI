@@ -5,6 +5,13 @@ interface RetryConfig extends InternalAxiosRequestConfig {
   _retry?: boolean
 }
 
+interface RefreshResponse {
+  data: {
+    accessToken: string
+    expiresAt: number
+  }
+}
+
 const baseUrl = import.meta.env.VITE_API_BASE_URL
 if (!baseUrl) {
   throw new Error('VITE_API_BASE_URL is not set — check your .env.local file')
@@ -16,27 +23,56 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 })
 
-api.interceptors.request.use((config) => {
-  const token = useAuthStore.getState().accessToken
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
-  }
-  return config
-})
-
 let isRefreshing = false
 const failedQueue: Array<{
-  resolve: (value: any) => void
-  reject: (reason?: any) => void
+  resolve: (value: unknown) => void
+  reject: (reason?: unknown) => void
 }> = []
 
-const processQueue = (error: any = null) => {
-  failedQueue.forEach((prom) => {
-    if (error) prom.reject(error)
-    else prom.resolve(null)
-  })
+const processQueue = (error: unknown = null) => {
+  failedQueue.forEach((p) => (error ? p.reject(error) : p.resolve(null)))
   failedQueue.length = 0
 }
+
+const doRefresh = async (): Promise<string> => {
+  const res = await api.post<RefreshResponse>('/auth/refresh')
+  const { accessToken, expiresAt } = res.data.data
+  useAuthStore.getState().setAccessToken(accessToken, expiresAt)
+  return accessToken
+}
+
+const handleAuthFailure = () => {
+  useAuthStore.getState().clearAuth()
+  window.location.href = '/login'
+}
+
+api.interceptors.request.use(async (config) => {
+  const { accessToken, expiresAt } = useAuthStore.getState()
+
+  if (accessToken && expiresAt) {
+    const expiresInMs = expiresAt - Date.now()
+
+    if (expiresInMs < 60_000 && !config.url?.includes('/auth/')) {
+      if (!isRefreshing) {
+        isRefreshing = true
+        try {
+          const newToken = await doRefresh()
+          processQueue()
+          config.headers.Authorization = `Bearer ${newToken}`
+        } catch (err) {
+          processQueue(err)
+          handleAuthFailure()
+        } finally {
+          isRefreshing = false
+        }
+      }
+    } else {
+      config.headers.Authorization = `Bearer ${accessToken}`
+    }
+  }
+
+  return config
+})
 
 api.interceptors.response.use(
   (response) => response,
@@ -49,6 +85,7 @@ api.interceptors.response.use(
       !config?.url?.includes('/auth/')
     ) {
       if (isRefreshing) {
+        // Another refresh is already in flight — queue this request
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject })
         })
@@ -60,24 +97,13 @@ api.interceptors.response.use(
       isRefreshing = true
 
       try {
-        const response = await api.post<{
-          data: { accessToken: string }
-        }>('/auth/refresh')
-
-        const newToken = response.data.data.accessToken
-        useAuthStore.getState().setAccessToken(newToken)
-
-        config.headers.Authorization = `Bearer ${newToken}`
-
+        const newToken = await doRefresh()
         processQueue()
-
+        config.headers.Authorization = `Bearer ${newToken}`
         return api(config)
       } catch (refreshError) {
         processQueue(refreshError)
-
-        useAuthStore.getState().clearAuth()
-        window.location.href = '/login'
-
+        handleAuthFailure()
         return Promise.reject(refreshError)
       } finally {
         isRefreshing = false

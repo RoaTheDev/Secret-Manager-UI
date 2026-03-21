@@ -7,7 +7,7 @@ import type {
   ShamirStatusResponse,
 } from '#/commons/types'
 import type { UserSummary } from '#/commons/types/userType.ts'
-import type { ProjectSummary } from '#/commons/types/projectType.ts'
+import type { ProjectDeletionVoteSummary, ProjectSummary } from '#/commons/types/projectType.ts'
 
 export const adminApi = {
   getUsers: (page = 0, size = 20) =>
@@ -15,13 +15,16 @@ export const adminApi = {
       params: { page, size },
     }),
 
-  deactivateUser: (id: string, adminIds?: string[]) =>
-    api.patch(`/admin/users/${id}/deactivate`, adminIds ? { adminIds } : undefined),
-  activateUser: (userId: string) =>
-    api.patch<ApiRes<void>>(`/admin/users/${userId}/activate`),
+  deactivateUser: (id: string) =>
+    api.patch<ApiRes<void>>(`/admin/users/${id}/deactivate`),
+
+  activateUser: (id: string) =>
+    api.patch<ApiRes<void>>(`/admin/users/${id}/activate`),
+
 
   initShamir: () => api.post<ApiRes<void>>('/admin/shamir/init'),
-
+  getOngoingDeletionVotes: () =>
+    api.get<ApiRes<ProjectDeletionVoteSummary[]>>('/admin/deletion-votes'),
   getShamirStatus: () =>
     api.get<ApiRes<ShamirStatusResponse>>('/admin/shamir/status'),
 

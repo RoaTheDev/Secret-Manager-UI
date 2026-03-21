@@ -86,7 +86,6 @@ export const ProjectRow = ({
         </TableCell>
         <TableCell align="right">
           <div className="flex items-center justify-end gap-3">
-            {/* Vote progress — shown once voting has started */}
             {hasVoted && !allVoted && (
               <div className="flex items-center gap-2">
                 <div className="flex gap-1">

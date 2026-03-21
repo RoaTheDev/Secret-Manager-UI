@@ -19,6 +19,7 @@ import { AppLayout } from '@/components/layout/AppLayout'
 import { projectApi } from '@/api/projectApi'
 import { useAuthStore } from '@/store/authStore'
 import { formatDistanceToNow } from 'date-fns'
+import { adminApi } from '#/api'
 
 export const Route = createFileRoute('/projects/')({
   component: RouteComponent,
@@ -47,7 +48,7 @@ function RouteComponent() {
   })
   const { data,isLoading } = useQuery({
     queryKey: ['projects'],
-    queryFn:  () => projectApi.getMyProjects(),
+    queryFn:  () => user?.role === "ADMIN"? adminApi.getAllProjects() : projectApi.getMyProjects(),
     staleTime: 1000 * 60 * 5,
   })
 

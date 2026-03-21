@@ -10,7 +10,13 @@ export const approvalApi = {
         params: { page, size, sort: 'createdAt,asc' },
       },
     ),
-
+  requestUserAction: (
+    targetUserId: string,
+    type: 'USER_DEACTIVATION' | 'USER_ACTIVATION',
+  ) =>
+    api.post<ApiRes<{ id: string; status: string; quorumRequired: number }>>(
+      `/approvals/user-action/${targetUserId}?type=${type}`,
+    ),
   castVote: (requestId: string, data: CastVoteRequest) =>
     api.post<ApiRes<VoteCastResponse>>(`/approvals/${requestId}/vote`, data),
 }

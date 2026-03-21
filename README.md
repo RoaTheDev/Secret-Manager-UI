@@ -1,204 +1,133 @@
-Welcome to your new TanStack Start app! 
+# Secrets Manager Frontend
 
-# Getting Started
+The web interface for Secrets Manager. Built with React 19, TypeScript, Tailwind CSS v4, and MUI v7.
 
-To run this application:
+---
+
+## Requirements
+
+- Node.js 20+
+- pnpm 9+ (or npm/yarn)
+
+---
+
+## Getting Started
+
+**1. Install dependencies**
 
 ```bash
 pnpm install
+```
+
+**2. Configure environment variables**
+
+Create a `.env.local` file in the project root:
+
+| Variable            | Description                                               |
+|---------------------|-----------------------------------------------------------|
+| `VITE_API_BASE_URL` | Base URL of the backend API, e.g. `http://localhost:8080` |
+
+```env
+VITE_API_BASE_URL=http://localhost:8080
+```
+
+> All environment variables must be prefixed with `VITE_` to be accessible in the browser. The `.env.local` file is git-ignored by default.
+
+**3. Start the dev server**
+
+```bash
 pnpm dev
 ```
 
-# Building For Production
+The app starts on `http://localhost:3000`. All `/api` requests are proxied to `VITE_API_BASE_URL` automatically, so CORS is not an issue during development.
 
-To build this application for production:
+**4. Build for production**
 
 ```bash
 pnpm build
 ```
 
-## Testing
+Output goes to `dist/`. Deploy to Vercel, Netlify, or any static host. Set `VITE_API_BASE_URL` in the hosting platform's environment variable settings.
 
-This project uses [Vitest](https://vitest.dev/) for testing. You can run the tests with:
+---
 
-```bash
-pnpm test
+## Demo Accounts
+
+| Name   | Email           | Password     | Role            |
+|--------|-----------------|--------------|-----------------|
+| Roa    | roa@demo.com    | Password123! | Admin           |
+| Alice  | alice@demo.com  | Password123! | Admin           |
+| Rem    | rem@demo.com    | Password123! | Team Lead       |
+| Anna   | anna@demo.com   | Password123! | Project Manager |
+| Tiamat | tiamat@demo.com | Password123! | Developer       |
+| Gwen   | gwen@demo.com   | Password123! | Developer       |
+
+---
+
+## Project Structure
+
+```
+src/
+├── api/                  # Axios API functions per domain
+│   ├── authApi.ts
+│   ├── projectApi.ts
+│   ├── credentialApi.ts
+│   ├── approvalApi.ts
+│   ├── adminApi.ts
+│   └── index.ts          # Barrel re-export
+├── commons/
+│   ├── constant/         # Shared enums and app-level constants
+│   └── types/            # TypeScript interfaces per domain
+├── components/
+│   ├── admin/            # Admin panel tab components
+│   ├── credential/       # Credential viewer, editor, reveal panel, sidebar
+│   ├── layout/           # AppLayout with sidebar navigation
+│   └── projects/         # Project credential and member list components
+├── integrations/
+│   └── root-provider.tsx # TanStack Query provider setup
+├── lib/
+│   ├── axiosConfig.ts    # Axios instance with JWT interceptor and auto-refresh
+│   └── linters.ts        # CodeMirror linters per credential type
+├── routes/               # TanStack Router file-based routes
+│   ├── __root.tsx        # Root layout with auth guard and silent refresh
+│   ├── login.tsx
+│   ├── index.tsx         # Dashboard
+│   ├── projects/
+│   ├── credentials/
+│   ├── approvals/
+│   └── admin/
+├── store/
+│   └── authStore.ts      # Zustand auth state persisted to sessionStorage
+├── main.tsx              # App entry point
+├── router.tsx            # Router configuration
+└── styles.css            # Tailwind v4 directives and MUI layer order
 ```
 
-## Styling
+---
 
-This project uses [Tailwind CSS](https://tailwindcss.com/) for styling.
+## Auth Flow
 
-### Removing Tailwind CSS
+Session state is stored in `sessionStorage` so it survives page refreshes but clears when the tab is closed.
 
-If you prefer not to use Tailwind CSS:
+On every page load the root route checks `sessionStorage` for an existing session. If none is found it attempts a silent token refresh using the HttpOnly refresh token cookie. If the cookie is missing or expired the user is redirected to the login page.
 
-1. Remove the demo pages in `src/routes/demo/`
-2. Replace the Tailwind import in `src/styles.css` with your own styles
-3. Remove `tailwindcss()` from the plugins array in `vite.config.ts`
-4. Uninstall the packages: `pnpm add @tailwindcss/vite tailwindcss --dev`
+Access tokens are refreshed proactively when less than 60 seconds remain, before any outgoing request. A fallback 401 interceptor handles unexpected token expiry.
 
-## Linting & Formatting
+---
 
+## Tech Stack
 
-This project uses [eslint](https://eslint.org/) and [prettier](https://prettier.io/) for linting and formatting. Eslint is configured using [tanstack/eslint-config](https://tanstack.com/config/latest/docs/eslint). The following scripts are available:
-
-```bash
-pnpm lint
-pnpm format
-pnpm check
-```
-
-
-
-## Routing
-
-This project uses [TanStack Router](https://tanstack.com/router) with file-based routing. Routes are managed as files in `src/routes`.
-
-### Adding A Route
-
-To add a new route to your application just add a new file in the `./src/routes` directory.
-
-TanStack will automatically generate the content of the route file for you.
-
-Now that you have two routes you can use a `Link` component to navigate between them.
-
-### Adding Links
-
-To use SPA (Single Page Application) navigation you will need to import the `Link` component from `@tanstack/react-router`.
-
-```tsx
-import { Link } from "@tanstack/react-router";
-```
-
-Then anywhere in your JSX you can use it like so:
-
-```tsx
-<Link to="/about">About</Link>
-```
-
-This will create a link that will navigate to the `/about` route.
-
-More information on the `Link` component can be found in the [Link documentation](https://tanstack.com/router/v1/docs/framework/react/api/router/linkComponent).
-
-### Using A Layout
-
-In the File Based Routing setup the layout is located in `src/routes/__root.tsx`. Anything you add to the root route will appear in all the routes. The route content will appear in the JSX where you render `{children}` in the `shellComponent`.
-
-Here is an example layout that includes a header:
-
-```tsx
-import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
-
-export const Route = createRootRoute({
-  head: () => ({
-    meta: [
-      { charSet: 'utf-8' },
-      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { title: 'My App' },
-    ],
-  }),
-  shellComponent: ({ children }) => (
-    <html lang="en">
-      <head>
-        <HeadContent />
-      </head>
-      <body>
-        <header>
-          <nav>
-            <Link to="/">Home</Link>
-            <Link to="/about">About</Link>
-          </nav>
-        </header>
-        {children}
-        <Scripts />
-      </body>
-    </html>
-  ),
-})
-```
-
-More information on layouts can be found in the [Layouts documentation](https://tanstack.com/router/latest/docs/framework/react/guide/routing-concepts#layouts).
-
-## Server Functions
-
-TanStack Start provides server functions that allow you to write server-side code that seamlessly integrates with your client components.
-
-```tsx
-import { createServerFn } from '@tanstack/react-start'
-
-const getServerTime = createServerFn({
-  method: 'GET',
-}).handler(async () => {
-  return new Date().toISOString()
-})
-
-// Use in a component
-function MyComponent() {
-  const [time, setTime] = useState('')
-  
-  useEffect(() => {
-    getServerTime().then(setTime)
-  }, [])
-  
-  return <div>Server time: {time}</div>
-}
-```
-
-## API Routes
-
-You can create API routes by using the `server` property in your route definitions:
-
-```tsx
-import { createFileRoute } from '@tanstack/react-router'
-import { json } from '@tanstack/react-start'
-
-export const Route = createFileRoute('/api/hello')({
-  server: {
-    handlers: {
-      GET: () => json({ message: 'Hello, World!' }),
-    },
-  },
-})
-```
-
-## Data Fetching
-
-There are multiple ways to fetch data in your application. You can use TanStack Query to fetch data from a server. But you can also use the `loader` functionality built into TanStack Router to load the data for a route before it's rendered.
-
-For example:
-
-```tsx
-import { createFileRoute } from '@tanstack/react-router'
-
-export const Route = createFileRoute('/people')({
-  loader: async () => {
-    const response = await fetch('https://swapi.dev/api/people')
-    return response.json()
-  },
-  component: PeopleComponent,
-})
-
-function PeopleComponent() {
-  const data = Route.useLoaderData()
-  return (
-    <ul>
-      {data.results.map((person) => (
-        <li key={person.name}>{person.name}</li>
-      ))}
-    </ul>
-  )
-}
-```
-
-Loaders simplify your data fetching logic dramatically. Check out more information in the [Loader documentation](https://tanstack.com/router/latest/docs/framework/react/guide/data-loading#loader-parameters).
-
-# Demo files
-
-Files prefixed with `demo` can be safely deleted. They are there to provide a starting point for you to play around with the features you've installed.
-
-# Learn More
-
-You can learn more about all of the offerings from TanStack in the [TanStack documentation](https://tanstack.com).
-
-For TanStack Start specific documentation, visit [TanStack Start](https://tanstack.com/start).
+| Layer               | Technology                            |
+|---------------------|---------------------------------------|
+| Framework           | React 19                              |
+| Language            | TypeScript                            |
+| Styling             | Tailwind CSS v4 + MUI v7              |
+| Routing             | TanStack Router                       |
+| Data fetching       | TanStack Query                        |
+| HTTP client         | Axios                                 |
+| State management    | Zustand v5                            |
+| Forms               | React Hook Form + Zod                 |
+| Code editor         | CodeMirror 6 via uiw/react-codemirror |
+| Syntax highlighting | Shiki                                 |
+| Icons               | Lucide React + MUI icon               |
+| Build               | Vite                                  |

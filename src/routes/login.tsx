@@ -53,7 +53,6 @@ export function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center p-6 bg-surface-100">
       <div className="w-full max-w-[400px]">
-        {/* Header */}
         <div className="text-center mb-8">
           <div
             className="inline-flex items-center justify-center w-[52px] h-[52px]
@@ -153,10 +152,6 @@ export function LoginPage() {
             </Button>
           </form>
         </div>
-
-        <p className="text-center text-xs text-surface-400 mt-5">
-          Demo — try tiamat@demo.com / Password123!
-        </p>
       </div>
     </div>
   )

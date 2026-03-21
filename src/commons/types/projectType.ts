@@ -8,7 +8,13 @@ export interface CreateProjectRequest {
 export interface AddMemberRequest {
   userId: string
 }
-
+export interface ProjectDeletionVoteSummary {
+  projectId: string
+  projectName: string
+  votedCount: number
+  totalAdmins: number
+  hasVoted: boolean
+}
 export interface ProjectSummary {
   id: string
   name: string
